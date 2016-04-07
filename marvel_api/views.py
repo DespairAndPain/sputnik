@@ -16,15 +16,16 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
+privat_key = 'f2aef3327f9d5859b700a4a52da3291dfd1b968c'
+public_key = '31d015169ce2dc5756cb03569e2544cd'
+ts = '1'
+
+
 def ComicsList(request):
     if request.method == 'GET':
         page = request.GET.get('page')
-        print(page)
 
         title = request.GET['title']
-        privat_key = 'f2aef3327f9d5859b700a4a52da3291dfd1b968c'
-        public_key = '31d015169ce2dc5756cb03569e2544cd'
-        ts = '1'
 
         str = ts + privat_key + public_key
         m = hashlib.md5()
@@ -49,32 +50,98 @@ def ComicsList(request):
                     for i in j.get('data').get('results'):
                         di[i.get('id')] = i.get('title')
                 count_pages = round(count_items/10)
-                di['pages'] = count_pages
-                di['page'] = 1
+                pages = count_pages
+                page = 1
         else:
             with urllib.request.urlopen(url) as f:
                 j = json.loads(f.read().decode('utf-8'))
                 count_pages = len(j.get('data').get('results'))
 
                 counter = 0
-                page = int(page)*10
-                previous = page - 10
+                counts = int(page) * 10
+                previous = counts - 10
 
                 for i in j.get('data').get('results'):
-                    if counter < page and counter > previous:
+                    if counter < counts and counter > previous:
                         di[i.get('id')] = i.get('title')
                     counter += 1
 
-                di['pages'] = count_pages
-                di['page'] = 1
+                count_pages = round(count_pages / 10)
+                pages = count_pages
 
+        response = {}
+        response["page"] = page
+        response["pages"] = pages
+        response["result"] = di
     return JSONResponse(di)
 
 
-        # if len(i.get('events').get('items'))>0:
-        #    list = []
-        #    for item in i.get('events').get('items'):
-        #        list.append(item.get('name'))
-        #    di[i.get('name')] = list
-        # else:
-        #    di[i.get('name')] = None
+def HeroEventsList(request):
+    if request.method == 'GET':
+        page = request.GET.get('page')
+
+        name = request.GET['name']
+
+        str = ts + privat_key + public_key
+        m = hashlib.md5()
+        m.update(str.encode('utf-8'))
+        params = urllib.parse.urlencode({'hash': m.hexdigest(), 'apikey': '31d015169ce2dc5756cb03569e2544cd', \
+                                         'ts': '1', 'nameStartsWith': name
+                                         })
+        url = "http://gateway.marvel.com:80/v1/public/characters?%s" % params
+        print(url)
+        di = {}
+        if page is None:
+            with urllib.request.urlopen(url) as f:
+
+                j = json.loads(f.read().decode('utf-8'))
+                count_items = len(j.get('data').get('results'))
+
+                if count_items > 10:
+                    counter = 0
+                    for i in j.get('data').get('results'):
+                        if counter < 10:
+                            if len(i.get('events').get('items')) > 0:
+                                list = []
+                                for item in i.get('events').get('items'):
+                                    list.append(item.get('name'))
+                                di[i.get('name')] = list
+                            else:
+                                di[i.get('name')] = None
+                        counter += 1
+                else:
+                    for i in j.get('data').get('results'):
+                        di[i.get('id')] = i.get('title')
+
+                count_pages = round(count_items / 10)
+                pages = count_pages
+                page = 1
+        else:
+            with urllib.request.urlopen(url) as f:
+                j = json.loads(f.read().decode('utf-8'))
+                count_items = len(j.get('data').get('results'))
+
+                counter = 0
+                counts = int(page) * 10
+                previous = counts - 10
+
+                for i in j.get('data').get('results'):
+                    if counter < counts and counter > previous:
+                        if len(i.get('events').get('items')) > 0:
+                            list = []
+                            for item in i.get('events').get('items'):
+                                list.append(item.get('name'))
+                            di[i.get('name')] = list
+                        else:
+                            di[i.get('name')] = None
+                    counter += 1
+
+                count_pages = round(count_items / 10)
+                pages = count_pages
+
+        response = {}
+        response["page"] = page
+        response["pages"] = pages
+        response["result"] = di
+
+    return JSONResponse(response)
