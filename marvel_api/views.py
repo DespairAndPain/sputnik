@@ -3,11 +3,14 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import HttpResponse
+from .models import Heroes, Comics, Creators, Series
 import urllib.request
 import urllib.parse
 import json
 import hashlib
+import re
 global str
+
 
 class JSONResponse(HttpResponse):
     def __init__(self, data, **kwargs):
@@ -21,18 +24,23 @@ public_key = '31d015169ce2dc5756cb03569e2544cd'
 ts = '1'
 
 
-def ComicsList(request):
+def comics_list(request):
     if request.method == 'GET':
+        # берутся параметры из запроса
         page = request.GET.get('page')
-
         title = request.GET['title']
 
+        # хэш функция ключей для аутентификации на сервере
         str = ts + privat_key + public_key
         m = hashlib.md5()
+
         m.update(str.encode('utf-8'))
+
+        # параметры гет запроса у сервера
         params = urllib.parse.urlencode({'hash': m.hexdigest(), 'apikey': '31d015169ce2dc5756cb03569e2544cd', \
                                          'ts': '1', 'titleStartsWith': title, 'format': 'comic',
                                          })
+        # получаем список комиксов сожержащих подстроку в заголовке
         url = "http://gateway.marvel.com:80/v1/public/comics?%s" % params
         print(url)
         di = {}
@@ -49,6 +57,7 @@ def ComicsList(request):
                 else:
                     for i in j.get('data').get('results'):
                         di[i.get('id')] = i.get('title')
+                # выставляются страницы
                 count_pages = round(count_items/10)
                 pages = count_pages
                 page = 1
@@ -65,7 +74,7 @@ def ComicsList(request):
                     if counter < counts and counter > previous:
                         di[i.get('id')] = i.get('title')
                     counter += 1
-
+                # выставляются страницы
                 count_pages = round(count_pages / 10)
                 pages = count_pages
 
@@ -73,13 +82,13 @@ def ComicsList(request):
         response["page"] = page
         response["pages"] = pages
         response["result"] = di
-    return JSONResponse(di)
+    return JSONResponse(response)
 
 
-def HeroEventsList(request):
+def hero_events_list(request):
     if request.method == 'GET':
-        page = request.GET.get('page')
 
+        page = request.GET.get('page')
         name = request.GET['name']
 
         str = ts + privat_key + public_key
@@ -88,6 +97,8 @@ def HeroEventsList(request):
         params = urllib.parse.urlencode({'hash': m.hexdigest(), 'apikey': '31d015169ce2dc5756cb03569e2544cd', \
                                          'ts': '1', 'nameStartsWith': name
                                          })
+
+        # все события связанные с героем
         url = "http://gateway.marvel.com:80/v1/public/characters?%s" % params
         print(url)
         di = {}
@@ -145,3 +156,71 @@ def HeroEventsList(request):
         response["result"] = di
 
     return JSONResponse(response)
+
+
+def refresh_data(request):
+    if request.method == 'GET':
+        str = ts + privat_key + public_key
+        m = hashlib.md5()
+        m.update(str.encode('utf-8'))
+
+        # Собираются таблицы с героями, авторами, сериями комиксов и самими комиксами
+        params = urllib.parse.urlencode({'hash': m.hexdigest(), 'apikey': '31d015169ce2dc5756cb03569e2544cd', \
+                                         'ts': '1',
+                                         })
+        url = "http://gateway.marvel.com:80/v1/public/series?%s" % params
+
+        with urllib.request.urlopen(url) as f:
+
+            j = json.loads(f.read().decode('utf-8'))
+            for i in j.get('data').get('results'):
+                series = Series(series_id=i.get('id'))
+                # знаю что плохо делать так много коммитов
+                series.save()
+
+        url = "http://gateway.marvel.com:80/v1/public/creators?%s" % params
+
+        with urllib.request.urlopen(url) as f:
+
+            j = json.loads(f.read().decode('utf-8'))
+            for i in j.get('data').get('results'):
+                creators = Creators(creators_id=i.get('id'))
+                creators.save()
+
+        url = "http://gateway.marvel.com:80/v1/public/characters?%s" % params
+
+        with urllib.request.urlopen(url) as f:
+
+            j = json.loads(f.read().decode('utf-8'))
+            for i in j.get('data').get('results'):
+                heroes = Heroes(heroes_id=i.get('id'))
+                heroes.save()
+
+        params = urllib.parse.urlencode({'hash': m.hexdigest(), 'apikey': '31d015169ce2dc5756cb03569e2544cd', \
+                                         'ts': '1', 'format': 'comic'
+                                         })
+
+        url = "http://gateway.marvel.com:80/v1/public/comics?%s" % params
+
+        with urllib.request.urlopen(url) as f:
+
+            j = json.loads(f.read().decode('utf-8'))
+            for i in j.get('data').get('results'):
+                comics_id = i.get('id')
+                series = re.findall('\w+', i.get('series').get('resourceURL'))[-1]
+
+                creators_items = i.get('creators').get('items')
+                creators_list = []
+                for item in creators_items:
+                    creators_list.append(re.findall('\w+', item.get('series').get('resourceURL'))[-1])
+
+                heroes_items = i.get('characters').get('items')
+                heroes_list = []
+                for item in heroes_items:
+                    heroes_list.append(re.findall('\w+', item.get('series').get('resourceURL'))[-1])
+
+                for creators_i in creators_items:
+                    for heroes_i in heroes_items:
+                        comics = Comics(comics_id=comics_id, s_id=series, h_id=heroes_i, c_id=creators_i)
+                        comics.save()
+

@@ -5,8 +5,9 @@ from . import views
 
 urlpatterns = patterns('',
                        url(r'^api-token-auth/', auth_view.obtain_auth_token),
-                       url(r'^list$', views.ComicsList),
-                       url(r'^heroevents$', views.HeroEventsList),
+                       url(r'^list$', views.comics_list),
+                       url(r'^heroevents$', views.hero_events_list),
+                       url(r'^refreshdata$', views.refresh_data),
                        )
 
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
