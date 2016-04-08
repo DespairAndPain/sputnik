@@ -1,21 +1,21 @@
 from django.db import models
 
 
-class Series(models.Model):
+class Comics(models.Model):
+    comics_id = models.IntegerField(verbose_name='comics_id')
+    title = models.CharField(max_length=250, verbose_name='title')
     series_id = models.IntegerField(verbose_name='series_id')
-
-
-class Creators(models.Model):
     creators_id = models.IntegerField(verbose_name='creators_id')
-
-
-class Heroes(models.Model):
     heroes_id = models.IntegerField(verbose_name='heroes_id')
 
 
-class Comics(models.Model):
-    comics_id = models.IntegerField(verbose_name='comics_id')
-    s_id = models.IntegerField(verbose_name='s_id')
-    c_id = models.IntegerField(verbose_name='c_id')
-    h_id = models.IntegerField(verbose_name='h_id')
+class ComicsList(models.Model):
+    title_param = models.CharField(max_length=250, verbose_name='title_param')
+    id_r = models.IntegerField(verbose_name='id_r')
+    title_r = models.CharField(max_length=250, verbose_name='title_r')
 
+
+class HeroEventsList(models.Model):
+    name_param = models.CharField(max_length=250, verbose_name='name_param')
+    name_r = models.IntegerField(verbose_name='name_r')
+    events_r = models.CharField(max_length=2000, verbose_name='events_r')

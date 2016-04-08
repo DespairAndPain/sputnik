@@ -8,6 +8,7 @@ urlpatterns = patterns('',
                        url(r'^list$', views.comics_list),
                        url(r'^heroevents$', views.hero_events_list),
                        url(r'^refreshdata$', views.refresh_data),
+                       url(r'^similarcomics$', views.similar_comics_data),
                        )
 
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
