@@ -237,3 +237,9 @@ def similar_comics_data(request):
         for i in rows:
             response[""+counter+""] = [i['title1'], i['title2']]
             counter += 1
+
+        return JSONResponse(response)
+
+
+def base(request):
+    return render(request, 'base.html')

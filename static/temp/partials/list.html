@@ -1,0 +1,82 @@
+<div class="container">
+    <div class="page-header">
+        <h1 class="text-center">API</h1>
+    </div>
+</div>
+
+<div class="part">
+    <div class="container">
+        <div class="row">
+            <h3>Получение токена от сервера</h3>
+        </div>
+        <div >
+            <p class="bg-info">http://127.0.0.1:8000/api/api-token-auth/</p>
+        </div>
+    </div>
+</div>
+
+<div class="part">
+    <div class="container">
+        <div class="row">
+            <h3>Получить список комиксов, содержащих подстроку в заголовке</h3>
+        </div>
+        <div class="row">
+            <div>
+                <input type="text" ng-model="titleText" class="form-control" placeholder="Заголовок">
+            </div>
+        </div>
+        <div >
+            <p class="bg-info">http://127.0.0.1:8000/api/list?title={{ titleText }}</p>
+        </div>
+        <div>
+            <a href='/list?title={{ titleText }}' class='btn btn-primary '>Тест</a>
+        </div>
+    </div>
+</div>
+
+<div class="part">
+    <div class="container">
+        <div class="row">
+            <h3>Получить все события связанные с героем</h3>
+        </div>
+        <div class="row">
+            <div>
+                <input type="text" ng-model="nameText" class="form-control" placeholder="название героя">
+            </div>
+        </div>
+        <div >
+            <p class="bg-info">http://127.0.0.1:8000/api/heroevents?name={{ nameText }}</p>
+        </div>
+        <div>
+            <a href='/heroevents?name={{ nameText }}' class='btn btn-primary '>Тест</a>
+        </div>
+    </div>
+</div>
+
+<div class="part">
+    <div class="container">
+        <div class="row">
+            <h3>Получить список комиксов с похожими авторами, героями из одиной серии</h3>
+        </div>
+
+        <div class="row">
+            <h5>Для обновления данных на сервере:</h5>
+        </div>
+        <div>
+            <p class="bg-info">http://127.0.0.1:8000/api/refreshdata</p>
+        </div>
+        <div>
+            <a href='/refreshdata' class='btn btn-primary '>Тест</a>
+        </div>
+
+        <div class="row">
+            <h5>Для получения списка:</h5>
+        </div>
+        <div>
+            <p class="bg-info">http://127.0.0.1:8000/api/similarcomics</p>
+        </div>
+        <div>
+            <a href='/similarcomics' class='btn btn-primary '>Тест</a>
+        </div>
+    </div>
+</div>
