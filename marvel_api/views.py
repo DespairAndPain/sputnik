@@ -31,7 +31,15 @@ def comics_list(request):
         page = request.GET.get('page')
         title = request.GET['title']
         di = {}
-        if ComicsList.objects.all().filter(title_param=title):
+
+        try:
+            obj = ComicsList.objects.all().filter(title_param=title)
+        except Exception:
+            print('Доступ к базе')
+        else:
+            obj = None
+
+        if obj is not None:
             result = ComicsList.objects.all().filter(title_param=title)
 
             for i in result:
@@ -50,10 +58,12 @@ def comics_list(request):
             # получаем список комиксов сожержащих подстроку в заголовке
             url = "http://gateway.marvel.com:80/v1/public/comics?%s" % params
             print(url)
+            # пагинация
             if page is None:
                 page = 1
                 with urllib.request.urlopen(url) as f:
                     j = json.loads(f.read().decode('utf-8'))
+                    # парсится json и запосится в дикт
                     count_items = len(j.get('data').get('results'))
                     if count_items > 10:
                         counter = 0
@@ -84,7 +94,7 @@ def comics_list(request):
                     # выставляются страницы
                     count_pages = round(count_pages / 10)
                     pages = count_pages
-
+            # результаты записыываются в базу
             for i in di.items():
                 comics_list_save = ComicsList(title_param=title, id_r=i[0], title_r=i[1])
                 comics_list_save.save()
@@ -102,7 +112,14 @@ def hero_events_list(request):
         name = request.GET['name']
         di = {}
 
-        if HeroEventsList.objects.all().filter(name_param=name):
+        try:
+            obj = ComicsList.objects.all().filter(title_param=title)
+        except Exception:
+            print('Доступ к базе')
+        else:
+            obj = None
+
+        if obj is not None:
             result = HeroEventsList.objects.all().filter(name_param=name)
 
             for i in result:
@@ -192,7 +209,7 @@ def refresh_data(request):
                                          })
 
         url = "http://gateway.marvel.com:80/v1/public/comics?%s" % params
-
+        # собираются данные оп всем комиксам, заносятся в дикт и в словарь в базе данных
         with urllib.request.urlopen(url) as f:
 
             j = json.loads(f.read().decode('utf-8'))
@@ -224,6 +241,7 @@ def refresh_data(request):
 def similar_comics_data(request):
     if request.method == 'GET':
         cursor = connection.cursor()
+        # находятся похожие комиксы по трём параметрам
         cursor.execute('''SELECT a.title as title1, b.title as title2,
                                  a.series_id, a.heroes_id, a.creators_id, b.series_id, b.heroes_id, b.creators_id
                             FROM public.marvel_api_comics a
