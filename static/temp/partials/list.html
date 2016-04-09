@@ -7,13 +7,25 @@
 <div class="part">
     <div class="container">
         <div class="row">
-            <h3>Получение токена от сервера</h3>
+            <h3>Получение токена от сервера если передать логин и пароль зарегестрированного пользователя</h3>
+        </div>
+        <div class="row">
+            <div>
+                <input type="text" ng-model="usernameText" class="form-control" placeholder="Логин">
+            </div>
+            <div>
+                <input type="text" ng-model="passwordText" class="form-control" placeholder="Пароль">
+            </div>
         </div>
         <div >
-            <p class="bg-info">http://127.0.0.1:8000/api/api-token-auth/</p>
+            <p class="bg-info">http://127.0.0.1:8000/api/api-token-auth?username={{ usernameText }}&password={{ passwordText }}</p>
+        </div>
+        <div>
+            <a href='/api/api-token-auth?username={{ usernameText }}&password={{ passwordText }}' class='btn btn-primary '>Тест</a>
         </div>
     </div>
 </div>
+
 
 <div class="part">
     <div class="container">
@@ -29,7 +41,7 @@
             <p class="bg-info">http://127.0.0.1:8000/api/list?title={{ titleText }}</p>
         </div>
         <div>
-            <a href='/list?title={{ titleText }}' class='btn btn-primary '>Тест</a>
+            <a href='/api/list?title={{ titleText }}' class='btn btn-primary '>Тест</a>
         </div>
     </div>
 </div>
@@ -48,7 +60,7 @@
             <p class="bg-info">http://127.0.0.1:8000/api/heroevents?name={{ nameText }}</p>
         </div>
         <div>
-            <a href='/heroevents?name={{ nameText }}' class='btn btn-primary '>Тест</a>
+            <a href='/api/heroevents?name={{ nameText }}' class='btn btn-primary '>Тест</a>
         </div>
     </div>
 </div>
@@ -66,7 +78,7 @@
             <p class="bg-info">http://127.0.0.1:8000/api/refreshdata</p>
         </div>
         <div>
-            <a href='/refreshdata' class='btn btn-primary '>Тест</a>
+            <a href='/api/refreshdata' class='btn btn-primary '>Тест</a>
         </div>
 
         <div class="row">
@@ -76,7 +88,7 @@
             <p class="bg-info">http://127.0.0.1:8000/api/similarcomics</p>
         </div>
         <div>
-            <a href='/similarcomics' class='btn btn-primary '>Тест</a>
+            <a href='/api/similarcomics' class='btn btn-primary '>Тест</a>
         </div>
     </div>
 </div>
